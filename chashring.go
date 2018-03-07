@@ -3,14 +3,14 @@ package Consistent_hashring_go
 import (
 	"math"
 	"strconv"
-	"sort"
+	"github.com/HuKeping/rbtree"
 )
 
 const DefaultNodeVirualSpot = 40
 
 type chashring struct {
 	nodeVirualSpot int
-	nodes          nodesArray
+	nodes          *rbtree.Rbtree
 	weights        map[string]int
 	useHash        hashAlgorithm
 }
@@ -83,7 +83,8 @@ func (hash *chashring) generate() {
 		totalW += w
 	}
 	totalVirtualSpots := hash.nodeVirualSpot * len(hash.weights)
-	hash.nodes = nodesArray{}
+
+	hash.nodes = rbtree.New()
 
 	for nodeKey, w := range hash.weights {
 		spots := int(math.Floor(float64(w) / float64(totalW) * float64(totalVirtualSpots)))
@@ -92,28 +93,43 @@ func (hash *chashring) generate() {
 				key:       nodeKey,
 				hashValue: hash.useHash.Hash((nodeKey + ":" + strconv.Itoa(i))),
 			}
-			hash.nodes = append(hash.nodes, n)
+
+			hash.nodes.Insert(n)
 		}
 	}
-	hash.nodes.Sort()
 }
 
 func (hash *chashring) GetNode(str string) string {
 
-	lenHashNodes := len(hash.nodes)
-
-	if lenHashNodes == 0 {
+	if hash.nodes.Len() == 0 {
 		return ""
 	}
 
 	strHash := hash.useHash.Hash(str)
 
-	index := sort.Search(len(hash.nodes), func(i int) bool {
-		return hash.nodes[i].hashValue >= strHash
-	});
-	if (index == lenHashNodes) {
-		index = 0
+	var findNodes []rbtree.Item
+
+	hash.nodes.Ascend(node{
+		key:       "",
+		hashValue: strHash,
+	}, func(i rbtree.Item) bool {
+		findNodes = append(findNodes, i)
+		return true
+	})
+
+	if len(findNodes) > 0 {
+		return findNodes[0].(node).key
+	} else
+	{
+		return hash.nodes.Min().(node).key
 	}
 
-	return hash.nodes[index].key
+	//index := sort.Search(len(hash.nodes), func(i int) bool {
+	//	return hash.nodes[i].hashValue >= strHash
+	//});
+	//if (index == lenHashNodes) {
+	//	index = 0
+	//}
+	//
+	//return hash.nodes[index].key
 }

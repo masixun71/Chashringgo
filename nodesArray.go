@@ -1,10 +1,17 @@
 package Consistent_hashring_go
 
-import "sort"
+import (
+	"sort"
+	"github.com/HuKeping/rbtree"
+)
 
 type node struct {
 	key string
 	hashValue uint32
+}
+
+func (n node) Less(than rbtree.Item) bool  {
+	return n.hashValue < than.(node).hashValue
 }
 
 
