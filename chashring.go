@@ -3,14 +3,14 @@ package Consistent_hashring_go
 import (
 	"math"
 	"strconv"
-	"github.com/HuKeping/rbtree"
+	"sort"
 )
 
 const DefaultNodeVirualSpot = 40
 
 type chashring struct {
 	nodeVirualSpot int
-	nodes          *rbtree.Rbtree
+	nodes          nodesArray
 	weights        map[string]int
 	useHash        hashAlgorithm
 }
@@ -84,7 +84,7 @@ func (hash *chashring) generate() {
 	}
 	totalVirtualSpots := hash.nodeVirualSpot * len(hash.weights)
 
-	hash.nodes = rbtree.New()
+	hash.nodes = nodesArray{}
 
 	for nodeKey, w := range hash.weights {
 		spots := int(math.Floor(float64(w) / float64(totalW) * float64(totalVirtualSpots)))
@@ -93,43 +93,48 @@ func (hash *chashring) generate() {
 				key:       nodeKey,
 				hashValue: hash.useHash.Hash((nodeKey + ":" + strconv.Itoa(i))),
 			}
-
-			hash.nodes.Insert(n)
+			hash.nodes = append(hash.nodes, n)
 		}
 	}
+
+	sort.Sort(hash.nodes)
 }
 
 func (hash *chashring) GetNode(str string) string {
 
-	if hash.nodes.Len() == 0 {
+	lenHashNodes := hash.nodes.Len()
+	if lenHashNodes == 0 {
 		return ""
 	}
+	//if hash.nodes.Len() == 0 {
+	//	return ""
+	//}
 
 	strHash := hash.useHash.Hash(str)
 
-	var findNodes rbtree.Item = nil
+	//var findNodes rbtree.Item = nil
 
-	hash.nodes.Ascend(node{
-		key:       "",
-		hashValue: strHash,
-	}, func(i rbtree.Item) bool {
-		findNodes = i
-		return false
-	})
+	//hash.nodes.Ascend(node{
+	//	key:       "",
+	//	hashValue: strHash,
+	//}, func(i rbtree.Item) bool {
+	//	findNodes = i
+	//	return false
+	//})
+	//
+	//if findNodes == nil {
+	//	return hash.nodes.Min().(node).key
+	//} else
+	//{
+	//	return findNodes.(node).key
+	//}
 
-	if findNodes == nil {
-		return hash.nodes.Min().(node).key
-	} else
-	{
-		return findNodes.(node).key
+	index := sort.Search(len(hash.nodes), func(i int) bool {
+		return hash.nodes[i].hashValue >= strHash
+	});
+	if (index == lenHashNodes) {
+		index = 0
 	}
 
-	//index := sort.Search(len(hash.nodes), func(i int) bool {
-	//	return hash.nodes[i].hashValue >= strHash
-	//});
-	//if (index == lenHashNodes) {
-	//	index = 0
-	//}
-	//
-	//return hash.nodes[index].key
+	return hash.nodes[index].key
 }

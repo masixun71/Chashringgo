@@ -12,6 +12,21 @@ func Benchmark_get(b *testing.B) {
 	nodeWeight[node1] = 1
 	nodeWeight[node2] = 1
 	nodeWeight[node3] = 1
+	nodeWeight[node4] = 1
+	nodeWeight[node5] = 1
+	nodeWeight[node6] = 1
+	nodeWeight[node7] = 1
+	nodeWeight[node8] = 1
+	nodeWeight[node9] = 1
+	nodeWeight[node10] = 1
+	nodeWeight[node11] = 1
+	nodeWeight[node12] = 1
+	nodeWeight[node13] = 1
+	nodeWeight[node14] = 1
+	nodeWeight[node15] = 1
+	nodeWeight[node16] = 1
+	nodeWeight[node17] = 1
+	nodeWeight[node18] = 1
 	vitualSpots := 1
 
 	hash := NewChashring(vitualSpots)
