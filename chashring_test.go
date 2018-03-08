@@ -29,7 +29,6 @@ func TestHash(t *testing.T) {
 		return true
 	})
 
-	t.Fatal(ss)
 
 	//node1Count := 0
 	//node2Count := 0

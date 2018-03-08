@@ -107,21 +107,21 @@ func (hash *chashring) GetNode(str string) string {
 
 	strHash := hash.useHash.Hash(str)
 
-	var findNodes []rbtree.Item
+	var findNodes rbtree.Item = nil
 
 	hash.nodes.Ascend(node{
 		key:       "",
 		hashValue: strHash,
 	}, func(i rbtree.Item) bool {
-		findNodes = append(findNodes, i)
-		return true
+		findNodes = i
+		return false
 	})
 
-	if len(findNodes) > 0 {
-		return findNodes[0].(node).key
+	if findNodes == nil {
+		return hash.nodes.Min().(node).key
 	} else
 	{
-		return hash.nodes.Min().(node).key
+		return findNodes.(node).key
 	}
 
 	//index := sort.Search(len(hash.nodes), func(i int) bool {
