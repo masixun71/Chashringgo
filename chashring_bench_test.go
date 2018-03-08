@@ -1,4 +1,4 @@
-package Consistent_hashring_go
+package Chashringgo
 
 import (
 	//	"fmt"
